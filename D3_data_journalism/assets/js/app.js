@@ -128,29 +128,29 @@ d3.csv("assets/data/data.csv").then(function(censusData, err) {
                         .call(bottomAxis);
 
     // Append y-axis
-    chartGroup.append("g").classed("y-axis", true).call(leftAxis);
+    var yAxis = chartGroup.append("g").classed("y-axis", true).call(leftAxis);
 
     // Create group for three x-axis labels
-    var xlabelsGroup = chartGroup.append("g")
+    var xLabelsGroup = chartGroup.append("g")
                                 .attr("transform", `translate(${width / 2}, ${height + 20})`);
 
     // Create and position the three labels for x-axis
     // Set poverty to initial paramter
-    var povertyXLabel = xlabelsGroup.append("text")
+    var povertyXLabel = xLabelsGroup.append("text")
                                     .attr("x", 0)
                                     .attr("y", 20)
                                     .attr("value", "poverty") // value to grab for event listener
                                     .classed("active", true)
                                     .text("In Poverty (%)");
 
-    var ageXLabel = xlabelsGroup.append("text")
+    var ageXLabel = xLabelsGroup.append("text")
                                 .attr("x", 0)
                                 .attr("y", 40)
                                 .attr("value", "age") // value to grab for event listener
                                 .classed("inactive", true)
                                 .text("Age (Median)");
 
-    var incomeXLabel = xlabelsGroup.append("text")
+    var incomeXLabel = xLabelsGroup.append("text")
                                 .attr("x", 0)
                                 .attr("y", 60)
                                 .attr("value", "income") // value to grab for event listener
@@ -158,12 +158,12 @@ d3.csv("assets/data/data.csv").then(function(censusData, err) {
                                 .text("Household Income (Median)");
 
    // Create group for three y-axis labels
-   var ylabelsGroup = chartGroup.append("g")
+   var yLabelsGroup = chartGroup.append("g")
                                 .attr("transform", `translate(${height /2}, 0)`);
                                
     // Create and position the three labels for y-axis
     // Set healthcare to initial paramter
-    var healthcareYLabel = ylabelsGroup.append("text")
+    var healthcareYLabel = yLabelsGroup.append("text")
                                     .attr("transform", "rotate(-90)")
                                     .attr("x", 0 - (height / 2))
                                     .attr("y", 60)
@@ -171,7 +171,7 @@ d3.csv("assets/data/data.csv").then(function(censusData, err) {
                                     .classed("active", true)
                                     .text("Lacks Healthcare (%)");
 
-    var obesityYLabel = ylabelsGroup.append("text")
+    var obesityYLabel = yLabelsGroup.append("text")
                                 .attr("transform", "rotate(-90)")
                                 .attr("x", 0 - (height / 2))
                                 .attr("y", 40)
@@ -179,7 +179,7 @@ d3.csv("assets/data/data.csv").then(function(censusData, err) {
                                 .classed("inactive", true)
                                 .text("Obese (%)");
 
-    var smokesYLabel = ylabelsGroup.append("text")
+    var smokesYLabel = yLabelsGroup.append("text")
                                     .attr("transform", "rotate(-90)")
                                     .attr("x", 0 - (height / 2))
                                     .attr("y", 20)
@@ -189,7 +189,7 @@ d3.csv("assets/data/data.csv").then(function(censusData, err) {
 
  
     // Event listener for x-axis labels
-    xlabelsGroup.selectAll("text")
+    xLabelsGroup.selectAll("text")
                 .on("click", function() {
 
         // Get value of selection
@@ -238,8 +238,8 @@ d3.csv("assets/data/data.csv").then(function(censusData, err) {
 });
 
     // Event listener for y-axis labels
-     ylabelsGroup.selectAll("text")
-     .on("click", function() {
+     yLabelsGroup.selectAll("text")
+                .on("click", function() {
 
     // Get value of selection
     var yValue = d3.select(this).attr("value");
