@@ -90,8 +90,7 @@ function renderYAxes(newYScale, yAxis) {
     return yAxis;
   }
 
-// Function used for updating circles group with a transition to
-// new circles
+// Function used for updating circles group with transition to new circles
 function renderCircles(circlesGroup, newXScale, chosenXAxis, newYScale, chosenYAxis) {
 
     circlesGroup.transition()
@@ -102,31 +101,16 @@ function renderCircles(circlesGroup, newXScale, chosenXAxis, newYScale, chosenYA
     return circlesGroup;
   }
 
-// Solution found and modified from Stack Overflow
-// https://stackoverflow.com/questions/55988709/how-can-i-add-labels-inside-the-points-in-a-scatterplot
-
 // Function to update circle labels after change of data parameter
-function renderLabels(circleLabels, newXScale, chosenXAxis, newYScale, chosenYAxis) {
+function renderLabels(labelsGroup, newXScale, chosenXAxis, newYScale, chosenYAxis) {
 
-    // Place abbreviation in circle at correct location
-    // Set font, font size, text placement and text colour
-    circleLabels
-            .attr("x", function(d) {
-            return xLinearScale(d[chosenXAxis]);
-        })
-            .attr("y", function(d) {
-            return yLinearScale(d[chosenYAxis]);
-        })
-            .text(function(d) {
-            return d.abbr;
-        })
-            .attr("font-family", "sans-serif")
-            .attr("alignment-baseline", "central")
-            .attr("font-size", "10px")
-            .attr("text-anchor", "middle")
-            .attr("fill", "white");
+    // Place abbreviation in circle at correct location with transition to new labels
+    labelsGroup.transition()
+            .duration(1000)
+            .attr("x", d => newXScale(d[chosenXAxis]))
+            .attr("y", d => newYScale(d[chosenYAxis]));
 
-    return circleLabels;
+    return labelsGroup;
 
 }
 
@@ -168,19 +152,30 @@ d3.csv("assets/data/data.csv").then(function(censusData, err) {
     // Append y-axis
     var yAxis = chartGroup.append("g").classed("y-axis", true).call(leftAxis);
 
+    // Create group for circles and their labels and bind data to them
+    var circlesLabelsGroup = chartGroup.selectAll("stateCircle")
+                                        .data(censusData)
+                                        .enter()
+                                        .append("g");
+
     // Append initial circles onto the chart
-    // Radius of circles is 12, filled with blue and opacity 0.5
-    var circlesGroup = chartGroup.selectAll(".stateCircle")
-                                .data(censusData)
-                                .enter()
+    // Radius of circles is 15, filled with blue and opacity 0.5
+    var circlesGroup = circlesLabelsGroup
                                 .append("circle")
-                                .attr("class", "stateCircle")
+                                .classed("stateCircle", true)
                                 .attr("cx", d => xLinearScale(d[chosenXAxis]))
                                 .attr("cy", d => yLinearScale(d[chosenYAxis]))
                                 .attr("r", 15)
-                                .attr("fill", "blue")
                                 .attr("opacity", "0.5");
 
+    // Set initial state abbreviations inside circles
+    var labelsGroup = circlesLabelsGroup
+                                .append("text")
+                                .attr("alignment-baseline", "central")
+                                .attr("x", d => xLinearScale(d[chosenXAxis]))
+                                .attr("y", d => yLinearScale(d[chosenYAxis]))
+                                .text(d => d.abbr)
+                                .classed("stateText", true); 
 
     // Create group for three x-axis labels
     var xLabelsGroup = chartGroup.append("g")
@@ -276,7 +271,7 @@ d3.csv("assets/data/data.csv").then(function(censusData, err) {
         circlesGroup = renderCircles(circlesGroup, xLinearScale, chosenXAxis, yLinearScale, chosenYAxis);
 
         // Create variable for circle labels i.e. the state's abbreviation
-        circleLabels = renderLabels(circleLabels, xLinearScale, chosenXAxis, yLinearScale, chosenYAxis);
+        labelsGroup = renderLabels(labelsGroup, xLinearScale, chosenXAxis, yLinearScale, chosenYAxis);
    
         // updates tooltips with new info
         // circlesGroup = updateToolTip(chosenXAxis, circlesGroup);
@@ -327,13 +322,9 @@ d3.csv("assets/data/data.csv").then(function(censusData, err) {
         // Updates circles with new y values
         circlesGroup = renderCircles(circlesGroup, xLinearScale, chosenXAxis, yLinearScale, chosenYAxis);
 
-        // Create variable for circle labels i.e. the state's abbreviation
-        // var circleLabels = chartGroup.selectAll(null).data(censusData).enter().append("text");
-
         // Updates circles with inside labels relocated
-        circleLabels = renderLabels(circleLabels, newXScale, chosenXAxis, newYScale, chosenYAxis);
+        labelsGroup = renderLabels(labelsGroup, xLinearScale, chosenXAxis, yLinearScale, chosenYAxis);
         
-
         // updates tooltips with new info
         // circlesGroup = updateToolTip(chosenXAxis, circlesGroup);
 
