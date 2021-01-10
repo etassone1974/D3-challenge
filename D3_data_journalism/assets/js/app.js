@@ -36,7 +36,8 @@ function xScale(censusData, chosenXAxis) {
     // Create linear scales as all numerical data
     // Scale from 0 to max value of chosen parameter for x-axis
     var xLinearScale = d3.scaleLinear()
-                        .domain([0, d3.max(censusData, d => d[chosenXAxis])])
+                        .domain([d3.min(censusData, d => d[chosenXAxis]) * 0.8, 
+                        d3.max(censusData, d => d[chosenXAxis]) * 1.2])
                         .range([0, width]);
   
     // Return the determined scale
@@ -65,7 +66,8 @@ function yScale(censusData, chosenYAxis) {
     // Create linear scales as all numerical data
     // Scale from 0 to max value of chosen parameter for y-axis
     var yLinearScale = d3.scaleLinear()
-                        .domain([0, d3.max(censusData, d => d[chosenYAxis])])
+                        .domain([d3.min(censusData, d => d[chosenYAxis]) * 0.8, 
+                        d3.max(censusData, d => d[chosenYAxis]) * 1.2])
                         .range([height, 0]);
   
     // Return the determined scale
@@ -129,6 +131,41 @@ d3.csv("assets/data/data.csv").then(function(censusData, err) {
 
     // Append y-axis
     var yAxis = chartGroup.append("g").classed("y-axis", true).call(leftAxis);
+
+    // Append initial circles onto the chart
+    // Radius of circles is 12, filled with blue and opacity 0.5
+    var circlesGroup = chartGroup.selectAll("circle")
+                                .data(censusData)
+                                .enter()
+                                .append("circle")
+                                .attr("cx", d => xLinearScale(d[chosenXAxis]))
+                                .attr("cy", d => yLinearScale(d[chosenYAxis]))
+                                .attr("r", 12)
+                                .attr("fill", "blue")
+                                .attr("opacity", "0.5");
+
+    // Solution found and modified from Stack Overflow
+    // https://stackoverflow.com/questions/55988709/how-can-i-add-labels-inside-the-points-in-a-scatterplot
+
+    // Create variable for circle labels i.e. the state's abbreviation
+    var circleLabels = chartGroup.selectAll(null).data(censusData).enter().append("text");
+
+    // Place abbreviation in circle at correct location
+    // Set font, font size, text placement and text colour
+    circleLabels
+        .attr("x", function(d) {
+            return xLinearScale(d[chosenXAxis]);
+        })
+        .attr("y", function(d) {
+            return yLinearScale(d[chosenYAxis]);
+        })
+        .text(function(d) {
+            return d.abbr;
+        })
+        .attr("font-family", "sans-serif")
+        .attr("font-size", "10px")
+        .attr("text-anchor", "middle")
+        .attr("fill", "white");
 
     // Create group for three x-axis labels
     var xLabelsGroup = chartGroup.append("g")
