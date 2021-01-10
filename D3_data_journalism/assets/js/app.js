@@ -114,21 +114,27 @@ function renderLabels(labelsGroup, newXScale, chosenXAxis, newYScale, chosenYAxi
 
 }
 
-// Function used for updating circles group with new tooltip
-function updateToolTip(circlesGroup, chosenXAxis, chosenYAxis) {
+// Function used for updating circles group and labels group with new tooltip
+function updateToolTip(circlesGroup, labelsGroup, chosenXAxis, chosenYAxis) {
 
+    // Declare variables to hold x and y text labels and ending symbols
     var xTipLabel;
     var yTipLabel;
     var xTipSymbol;
     var yTipSymbol;
   
+    // Set the label based on the chosen x and y axes
+    // Set the ending symbol or text based om the chosen x and y axes
+    // Poverty, Healthcare, Obese and Smokes all end in percent sign
+    // Age ends in yrs text
+    // Income has $ symbol appended before value
     if (chosenXAxis === "poverty") {
       xTipLabel = "Poverty: ";
       xTipSymbol = "%";
     }
     else if (chosenXAxis === "age") {
       xTipLabel = "Age: ";
-      xTipSymbol = "yrs";
+      xTipSymbol = " yrs";
     }
     else {
         xTipLabel = "Income: $";
@@ -147,27 +153,40 @@ function updateToolTip(circlesGroup, chosenXAxis, chosenYAxis) {
           yTipLabel = "Smokes: ";
           yTipSymbol = "%";
       }
-  
-    console.log(`${xTipLabel} ${xTipSymbol}`);
-    console.log(`${yTipLabel} ${yTipSymbol}`);
 
+    // Setup the tooltip with placement and HTML elements
     var toolTip = d3.tip()
       .attr("class", "tooltip d3-tip")
-      .offset([80, -60])
+      .offset([40, -60])
       .html(function(d) {
-        return (`${d.state}<hr><br>${xTiplabel}${d[chosenXAxis]}${xTipSymbol}<br>${yTipLabel}${d[chosenYAxis]}${yTipSymbol}`);
+        return (`${d.state}<br>${xTipLabel}${d[chosenXAxis]}${xTipSymbol}<br>${yTipLabel}${d[chosenYAxis]}${yTipSymbol}`);
     })
 
+    // Use tooltip with circles
     circlesGroup.call(toolTip);
 
+    // Show tooltip when mouse is over circle
     circlesGroup.on("mouseover", function(data) {
       toolTip.show(data, this);
     })
-    // onmouseout event
+    // Hide toolttip when mouse is away from circle
       .on("mouseout", function(data) {
         toolTip.hide(data, this);
       });
   
+    // Also use tooltips if mouse on abbreviation labels
+    labelsGroup.call(toolTip);
+
+    // Show tooltip when mouse is over label
+    labelsGroup.on("mouseover", function(data) {
+        toolTip.show(data, this);
+      })
+      // Hide tooltip when mouse is awaw from label
+        .on("mouseout", function(data) {
+          toolTip.hide(data, this);
+        });
+    
+    // Return circles group
     return circlesGroup;
   }
 
@@ -233,8 +252,8 @@ d3.csv("assets/data/data.csv").then(function(censusData, err) {
                                 .text(d => d.abbr)
                                 .classed("stateText", true); 
 
-    // updateToolTip function above csv import
-    circlesGroup = updateToolTip(circlesGroup, chosenXAxis, chosenYAxis);
+    // Call updateToolTip function above csv import for chosen x and y axes
+    circlesGroup = updateToolTip(circlesGroup, labelsGroup, chosenXAxis, chosenYAxis);
 
     // Create group for three x-axis labels
     var xLabelsGroup = chartGroup.append("g")
@@ -332,8 +351,8 @@ d3.csv("assets/data/data.csv").then(function(censusData, err) {
         // Create variable for circle labels i.e. the state's abbreviation
         labelsGroup = renderLabels(labelsGroup, xLinearScale, chosenXAxis, yLinearScale, chosenYAxis);
    
-        // updateToolTip function above csv import
-        circlesGroup = updateToolTip(circlesGroup, chosenXAxis, chosenYAxis);
+        // Call updateToolTip function above csv import for chosen x and y axes
+        circlesGroup = updateToolTip(circlesGroup, labelsGroup, chosenXAxis, chosenYAxis);
 
         // Changes classes to change bold text based on selected parameter
         // If age parameter is selected
@@ -384,8 +403,8 @@ d3.csv("assets/data/data.csv").then(function(censusData, err) {
         // Updates circles with inside labels relocated
         labelsGroup = renderLabels(labelsGroup, xLinearScale, chosenXAxis, yLinearScale, chosenYAxis);
         
-        // updateToolTip function above csv import
-        circlesGroup = updateToolTip(circlesGroup, chosenXAxis, chosenYAxis);   
+        // Call updateToolTip function above csv import for chosen x and y axes
+        circlesGroup = updateToolTip(circlesGroup, labelsGroup, chosenXAxis, chosenYAxis);   
 
         // Changes classes to change bold text based on selected parameter
         // If obesity parameter is selected
