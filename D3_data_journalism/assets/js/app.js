@@ -114,6 +114,62 @@ function renderLabels(labelsGroup, newXScale, chosenXAxis, newYScale, chosenYAxi
 
 }
 
+// Function used for updating circles group with new tooltip
+function updateToolTip(circlesGroup, chosenXAxis, chosenYAxis) {
+
+    var xTipLabel;
+    var yTipLabel;
+    var xTipSymbol;
+    var yTipSymbol;
+  
+    if (chosenXAxis === "poverty") {
+      xTipLabel = "Poverty: ";
+      xTipSymbol = "%";
+    }
+    else if (chosenXAxis === "age") {
+      xTipLabel = "Age: ";
+      xTipSymbol = "yrs";
+    }
+    else {
+        xTipLabel = "Income: $";
+        xTipSymbol = "";
+    }
+
+    if (chosenYAxis === "healthcare") {
+        yTipLabel = "Healthcare: ";
+        yTipSymbol = "%";
+      }
+      else if (chosenYAxis === "obesity") {
+        yTipLabel = "Obese: ";
+        yTipSymbol = "%";
+      }
+      else {
+          yTipLabel = "Smokes: ";
+          yTipSymbol = "%";
+      }
+  
+    console.log(`${xTipLabel} ${xTipSymbol}`);
+    console.log(`${yTipLabel} ${yTipSymbol}`);
+
+    var toolTip = d3.tip()
+      .attr("class", "tooltip d3-tip")
+      .offset([80, -60])
+      .html(function(d) {
+        return (`${d.state}<hr><br>${xTiplabel}${d[chosenXAxis]}${xTipSymbol}<br>${yTipLabel}${d[chosenYAxis]}${yTipSymbol}`);
+    })
+
+    circlesGroup.call(toolTip);
+
+    circlesGroup.on("mouseover", function(data) {
+      toolTip.show(data, this);
+    })
+    // onmouseout event
+      .on("mouseout", function(data) {
+        toolTip.hide(data, this);
+      });
+  
+    return circlesGroup;
+  }
 
 // Retrieve data from the CSV file and execute everything below
 d3.csv("assets/data/data.csv").then(function(censusData, err) {
@@ -176,6 +232,9 @@ d3.csv("assets/data/data.csv").then(function(censusData, err) {
                                 .attr("y", d => yLinearScale(d[chosenYAxis]))
                                 .text(d => d.abbr)
                                 .classed("stateText", true); 
+
+    // updateToolTip function above csv import
+    circlesGroup = updateToolTip(circlesGroup, chosenXAxis, chosenYAxis);
 
     // Create group for three x-axis labels
     var xLabelsGroup = chartGroup.append("g")
@@ -273,8 +332,8 @@ d3.csv("assets/data/data.csv").then(function(censusData, err) {
         // Create variable for circle labels i.e. the state's abbreviation
         labelsGroup = renderLabels(labelsGroup, xLinearScale, chosenXAxis, yLinearScale, chosenYAxis);
    
-        // updates tooltips with new info
-        // circlesGroup = updateToolTip(chosenXAxis, circlesGroup);
+        // updateToolTip function above csv import
+        circlesGroup = updateToolTip(circlesGroup, chosenXAxis, chosenYAxis);
 
         // Changes classes to change bold text based on selected parameter
         // If age parameter is selected
@@ -325,8 +384,8 @@ d3.csv("assets/data/data.csv").then(function(censusData, err) {
         // Updates circles with inside labels relocated
         labelsGroup = renderLabels(labelsGroup, xLinearScale, chosenXAxis, yLinearScale, chosenYAxis);
         
-        // updates tooltips with new info
-        // circlesGroup = updateToolTip(chosenXAxis, circlesGroup);
+        // updateToolTip function above csv import
+        circlesGroup = updateToolTip(circlesGroup, chosenXAxis, chosenYAxis);   
 
         // Changes classes to change bold text based on selected parameter
         // If obesity parameter is selected
