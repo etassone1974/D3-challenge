@@ -6,7 +6,7 @@ var svgHeight = 500;
 var margin = {
   top: 20,
   right: 40,
-  bottom: 80,
+  bottom: 100,
   left: 100
 };
 
@@ -159,14 +159,14 @@ d3.csv("assets/data/data.csv").then(function(censusData, err) {
 
    // Create group for three y-axis labels
    var yLabelsGroup = chartGroup.append("g")
-                                .attr("transform", `translate(${height /2}, 0)`);
+                                .attr("transform", `translate(${height/2}, 0)`);
                                
     // Create and position the three labels for y-axis
     // Set healthcare to initial paramter
     var healthcareYLabel = yLabelsGroup.append("text")
                                     .attr("transform", "rotate(-90)")
                                     .attr("x", 0 - (height / 2))
-                                    .attr("y", 60)
+                                    .attr("y", 0 - margin.left - 130)
                                     .attr("value", "healthcare") // value to grab for event listener
                                     .classed("active", true)
                                     .text("Lacks Healthcare (%)");
@@ -174,7 +174,7 @@ d3.csv("assets/data/data.csv").then(function(censusData, err) {
     var obesityYLabel = yLabelsGroup.append("text")
                                 .attr("transform", "rotate(-90)")
                                 .attr("x", 0 - (height / 2))
-                                .attr("y", 40)
+                                .attr("y", 0 - margin.left - 150)
                                 .attr("value", "obesity") // value to grab for event listener
                                 .classed("inactive", true)
                                 .text("Obese (%)");
@@ -182,7 +182,7 @@ d3.csv("assets/data/data.csv").then(function(censusData, err) {
     var smokesYLabel = yLabelsGroup.append("text")
                                     .attr("transform", "rotate(-90)")
                                     .attr("x", 0 - (height / 2))
-                                    .attr("y", 20)
+                                    .attr("y", 0 - margin.left - 170)
                                     .attr("value", "smokes") // value to grab for event listener
                                     .classed("inactive", true)
                                     .text("Smokes (%)");
