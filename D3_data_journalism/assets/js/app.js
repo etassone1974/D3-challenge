@@ -45,10 +45,10 @@ function xScale(censusData, chosenXAxis) {
   
   }
   
-  // Function used for updating x-axis paramter upon click on axis label
-  function renderXAxes(newXScale, xAxis) {
+// Function used for updating x-axis parameter upon click on axis label
+function renderXAxes(newXScale, xAxis) {
     
-    // Set the x-axis to the new paramter with its new scale
+    // Set the x-axis to the new parameter with its new scale
     var bottomAxis = d3.axisBottom(newXScale);
   
     // Use transition to animate update of display of x-axis
@@ -59,7 +59,7 @@ function xScale(censusData, chosenXAxis) {
     // Return the new x-axis for the chosen parameter
     return xAxis;
   }
-  
+
 // Function used for updating scale for y-axis upon click on axis label
 function yScale(censusData, chosenYAxis) {
 
@@ -74,25 +74,61 @@ function yScale(censusData, chosenYAxis) {
     return yLinearScale;
   
   }
-  
-  // Function used for updating y-axis paramter upon click on axis label
-  function renderYAxes(newYScale, yAxis) {
+
+// Function used for updating y-axis parameter upon click on axis label
+function renderYAxes(newYScale, yAxis) {
     
-    // Set the y-axis to the new paramter with its new scale
+    // Set the y-axis to the new parameter with its new scale
     var leftAxis = d3.axisLeft(newYScale);
   
     // Use transition to animate update of display of y-axis
     yAxis.transition()
-      .duration(1000)
-      .call(leftAxis);
+        .duration(1000)
+        .call(leftAxis);
   
     // Return the new y-axis for the chosen parameter
     return yAxis;
   }
 
+// Function used for updating circles group with a transition to
+// new circles
+function renderCircles(circlesGroup, newXScale, chosenXAxis, newYScale, chosenYAxis) {
 
+    circlesGroup.transition()
+      .duration(1000)
+      .attr("cx", d => newXScale(d[chosenXAxis]))
+      .attr("cy", d => newYScale(d[chosenYAxis]));
 
+    return circlesGroup;
+  }
 
+// Solution found and modified from Stack Overflow
+// https://stackoverflow.com/questions/55988709/how-can-i-add-labels-inside-the-points-in-a-scatterplot
+
+// Function to update circle labels after change of data parameter
+function renderLabels(circleLabels, newXScale, chosenXAxis, newYScale, chosenYAxis) {
+
+    // Place abbreviation in circle at correct location
+    // Set font, font size, text placement and text colour
+    circleLabels
+            .attr("x", function(d) {
+            return xLinearScale(d[chosenXAxis]);
+        })
+            .attr("y", function(d) {
+            return yLinearScale(d[chosenYAxis]);
+        })
+            .text(function(d) {
+            return d.abbr;
+        })
+            .attr("font-family", "sans-serif")
+            .attr("alignment-baseline", "central")
+            .attr("font-size", "10px")
+            .attr("text-anchor", "middle")
+            .attr("fill", "white");
+
+    return circleLabels;
+
+}
 
 
 // Retrieve data from the CSV file and execute everything below
@@ -101,7 +137,7 @@ d3.csv("assets/data/data.csv").then(function(censusData, err) {
     // Error handling
     if (err) throw err;
   
-    // Parse census data and convert to numerical format for the desired paramters
+    // Parse census data and convert to numerical format for the desired parameters
     censusData.forEach(function(data) {
       data.poverty = +data.poverty;
       data.age = +data.age;
@@ -113,10 +149,10 @@ d3.csv("assets/data/data.csv").then(function(censusData, err) {
 
     console.log(censusData);
 
-    // Use xScale function above csv import to scale initial x-axis for chosen paramter
+    // Use xScale function above csv import to scale initial x-axis for chosen parameter
     var xLinearScale = xScale(censusData, chosenXAxis);
 
-    // Use yScale function above csv import to scale initial y-axis for chosen paramter
+    // Use yScale function above csv import to scale initial y-axis for chosen parameter
     var yLinearScale = yScale(censusData, chosenYAxis);
 
     // Create initial axis functions
@@ -134,64 +170,49 @@ d3.csv("assets/data/data.csv").then(function(censusData, err) {
 
     // Append initial circles onto the chart
     // Radius of circles is 12, filled with blue and opacity 0.5
-    var circlesGroup = chartGroup.selectAll("circle")
+    var circlesGroup = chartGroup.selectAll(".stateCircle")
                                 .data(censusData)
                                 .enter()
                                 .append("circle")
+                                .attr("class", "stateCircle")
                                 .attr("cx", d => xLinearScale(d[chosenXAxis]))
                                 .attr("cy", d => yLinearScale(d[chosenYAxis]))
-                                .attr("r", 12)
+                                .attr("r", 15)
                                 .attr("fill", "blue")
                                 .attr("opacity", "0.5");
 
-    // Solution found and modified from Stack Overflow
-    // https://stackoverflow.com/questions/55988709/how-can-i-add-labels-inside-the-points-in-a-scatterplot
-
-    // Create variable for circle labels i.e. the state's abbreviation
-    var circleLabels = chartGroup.selectAll(null).data(censusData).enter().append("text");
-
-    // Place abbreviation in circle at correct location
-    // Set font, font size, text placement and text colour
-    circleLabels
-        .attr("x", function(d) {
-            return xLinearScale(d[chosenXAxis]);
-        })
-        .attr("y", function(d) {
-            return yLinearScale(d[chosenYAxis]);
-        })
-        .text(function(d) {
-            return d.abbr;
-        })
-        .attr("font-family", "sans-serif")
-        .attr("font-size", "10px")
-        .attr("text-anchor", "middle")
-        .attr("fill", "white");
 
     // Create group for three x-axis labels
     var xLabelsGroup = chartGroup.append("g")
                                 .attr("transform", `translate(${width / 2}, ${height + 20})`);
 
     // Create and position the three labels for x-axis
-    // Set poverty to initial paramter
+    // Set poverty to initial parameter
     var povertyXLabel = xLabelsGroup.append("text")
                                     .attr("x", 0)
                                     .attr("y", 20)
                                     .attr("value", "poverty") // value to grab for event listener
                                     .classed("active", true)
+                                    .classed("inactive", false)
+                                    .classed("aText", true)
                                     .text("In Poverty (%)");
 
     var ageXLabel = xLabelsGroup.append("text")
                                 .attr("x", 0)
                                 .attr("y", 40)
                                 .attr("value", "age") // value to grab for event listener
+                                .classed("active", false)
                                 .classed("inactive", true)
+                                .classed("aText", true)
                                 .text("Age (Median)");
 
     var incomeXLabel = xLabelsGroup.append("text")
                                 .attr("x", 0)
                                 .attr("y", 60)
                                 .attr("value", "income") // value to grab for event listener
+                                .classed("active", false)
                                 .classed("inactive", true)
+                                .classed("aText", true)
                                 .text("Household Income (Median)");
 
    // Create group for three y-axis labels
@@ -199,13 +220,15 @@ d3.csv("assets/data/data.csv").then(function(censusData, err) {
                                 .attr("transform", `translate(${height/2}, 0)`);
                                
     // Create and position the three labels for y-axis
-    // Set healthcare to initial paramter
+    // Set healthcare to initial parameter
     var healthcareYLabel = yLabelsGroup.append("text")
                                     .attr("transform", "rotate(-90)")
                                     .attr("x", 0 - (height / 2))
                                     .attr("y", 0 - margin.left - 130)
                                     .attr("value", "healthcare") // value to grab for event listener
                                     .classed("active", true)
+                                    .classed("inactive", false)
+                                    .classed("aText", true)
                                     .text("Lacks Healthcare (%)");
 
     var obesityYLabel = yLabelsGroup.append("text")
@@ -213,7 +236,9 @@ d3.csv("assets/data/data.csv").then(function(censusData, err) {
                                 .attr("x", 0 - (height / 2))
                                 .attr("y", 0 - margin.left - 150)
                                 .attr("value", "obesity") // value to grab for event listener
+                                .classed("active", false)
                                 .classed("inactive", true)
+                                .classed("aText", true)
                                 .text("Obese (%)");
 
     var smokesYLabel = yLabelsGroup.append("text")
@@ -221,7 +246,9 @@ d3.csv("assets/data/data.csv").then(function(censusData, err) {
                                     .attr("x", 0 - (height / 2))
                                     .attr("y", 0 - margin.left - 170)
                                     .attr("value", "smokes") // value to grab for event listener
+                                    .classed("active", false)
                                     .classed("inactive", true)
+                                    .classed("aText", true)
                                     .text("Smokes (%)");
 
  
@@ -232,7 +259,7 @@ d3.csv("assets/data/data.csv").then(function(censusData, err) {
         // Get value of selection
         var xValue = d3.select(this).attr("value");
 
-        // Check if selected value is not equal to currently selected paramter
+        // Check if selected value is not equal to currently selected parameter
         if (xValue !== chosenXAxis) {
 
         // Replace chosenXAxis with xValue
@@ -245,26 +272,29 @@ d3.csv("assets/data/data.csv").then(function(censusData, err) {
         // Updates x-axis with transition
         xAxis = renderXAxes(xLinearScale, xAxis);
 
-    // updates circles with new x values
-    // circlesGroup = renderCircles(circlesGroup, xLinearScale, chosenXAxis);
+        // Updates circles with new x values
+        circlesGroup = renderCircles(circlesGroup, xLinearScale, chosenXAxis, yLinearScale, chosenYAxis);
 
-    // updates tooltips with new info
-    // circlesGroup = updateToolTip(chosenXAxis, circlesGroup);
+        // Create variable for circle labels i.e. the state's abbreviation
+        circleLabels = renderLabels(circleLabels, xLinearScale, chosenXAxis, yLinearScale, chosenYAxis);
+   
+        // updates tooltips with new info
+        // circlesGroup = updateToolTip(chosenXAxis, circlesGroup);
 
-        // Changes classes to change bold text based on selected paramter
-        // If age paramter is selected
+        // Changes classes to change bold text based on selected parameter
+        // If age parameter is selected
         if (chosenXAxis === "age") {
-            ageXLabel.classed("active", true).classed("inactive", false);
             povertyXLabel.classed("active", false).classed("inactive", true);
+            ageXLabel.classed("active", true).classed("inactive", false);
             incomeXLabel.classed("active", false).classed("inactive", true);
         }
-        // If income paramter is selected
+        // If income parameter is selected
         else if (chosenXAxis === "income") {
             incomeXLabel.classed("active", true).classed("inactive", false);
             povertyXLabel.classed("active", false).classed("inactive", true);
             ageXLabel.classed("active", false).classed("inactive", true);
         }
-        // Else use default paramter of poverty
+        // Else use default parameter of poverty
         else {
             povertyXLabel.classed("active", true).classed("inactive", false);
             ageXLabel.classed("active", false).classed("inactive", true);
@@ -281,7 +311,7 @@ d3.csv("assets/data/data.csv").then(function(censusData, err) {
     // Get value of selection
     var yValue = d3.select(this).attr("value");
 
-    // Check if selected value is not equal to currently selected paramter
+    // Check if selected value is not equal to currently selected parameter
     if (yValue !== chosenYAxis) {
 
         // Replace chosenYAxis with yValue
@@ -294,26 +324,33 @@ d3.csv("assets/data/data.csv").then(function(censusData, err) {
         // Updates x-axis with transition
         yAxis = renderYAxes(yLinearScale, yAxis);
 
-        // updates circles with new x values
-        // circlesGroup = renderCircles(circlesGroup, xLinearScale, chosenXAxis);
+        // Updates circles with new y values
+        circlesGroup = renderCircles(circlesGroup, xLinearScale, chosenXAxis, yLinearScale, chosenYAxis);
+
+        // Create variable for circle labels i.e. the state's abbreviation
+        // var circleLabels = chartGroup.selectAll(null).data(censusData).enter().append("text");
+
+        // Updates circles with inside labels relocated
+        circleLabels = renderLabels(circleLabels, newXScale, chosenXAxis, newYScale, chosenYAxis);
+        
 
         // updates tooltips with new info
         // circlesGroup = updateToolTip(chosenXAxis, circlesGroup);
 
-        // Changes classes to change bold text based on selected paramter
-        // If obesity paramter is selected
+        // Changes classes to change bold text based on selected parameter
+        // If obesity parameter is selected
         if (chosenYAxis === "obesity") {
             obesityYLabel.classed("active", true).classed("inactive", false);
             healthcareYLabel.classed("active", false).classed("inactive", true);
             smokesYLabel.classed("active", false).classed("inactive", true);
         }       
-        // If income paramter is selected
+        // If income parameter is selected
         else if (chosenYAxis === "smokes") {
             smokesYLabel.classed("active", true).classed("inactive", false);
             healthcareYLabel.classed("active", false).classed("inactive", true);
             obesityYLabel.classed("active", false).classed("inactive", true);
         }
-        // Else use default paramter of healthcare
+        // Else use default parameter of healthcare
         else {
             healthcareYLabel.classed("active", true).classed("inactive", false);
             obesityYLabel.classed("active", false).classed("inactive", true);
