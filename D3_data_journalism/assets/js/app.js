@@ -34,7 +34,8 @@ var chosenYAxis = "healthcare";
 function xScale(censusData, chosenXAxis) {
 
     // Create linear scales as all numerical data
-    // Scale from 0 to max value of chosen parameter for x-axis
+    // Scale from 0.8 times minimum value to 1.8 times maximum value of chosen parameter for x-axis
+    // i.e. Domain extends from slightly below minimum value to slightly over maximum value
     var xLinearScale = d3.scaleLinear()
                         .domain([d3.min(censusData, d => d[chosenXAxis]) * 0.8, 
                         d3.max(censusData, d => d[chosenXAxis]) * 1.2])
@@ -64,7 +65,8 @@ function renderXAxes(newXScale, xAxis) {
 function yScale(censusData, chosenYAxis) {
 
     // Create linear scales as all numerical data
-    // Scale from 0 to max value of chosen parameter for y-axis
+    // Scale from 0.8 times minimum value to 1.8 times maximum value of chosen parameter for y-axis
+    // i.e. Domain extends from slightly below minimum value to slightly over maximum value
     var yLinearScale = d3.scaleLinear()
                         .domain([d3.min(censusData, d => d[chosenYAxis]) * 0.8, 
                         d3.max(censusData, d => d[chosenYAxis]) * 1.2])
